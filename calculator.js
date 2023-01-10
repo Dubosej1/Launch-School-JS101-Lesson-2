@@ -4,6 +4,10 @@ function prompt(message) {
   console.log(`=> ${message}`);
 }
 
+function invalidNumber(number) {
+  return number.trimStart() === '' || Number.isNaN(Number(number));
+}
+
 prompt('Welcome to Calculator');
 
 // Ask the user for the first number
@@ -11,11 +15,21 @@ prompt('Welcome to Calculator');
 prompt("What's the first number?");
 let number1 = readline.question();
 
+while (invalidNumber(number1)) {
+  prompt("Hmm... that doesn't look like a valid number.");
+  number1 = readline.question();
+}
+
 
 // Ask the user for the second number
 
 prompt("What's the second number?");
 let number2 = readline.question();
+
+while (invalidNumber(number2)) {
+  prompt("Hmm... that doesn't look like a valid number.");
+  number2 = readline.question();
+}
 
 // Ask the user for an operation to perform.
 
