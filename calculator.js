@@ -24,14 +24,20 @@ let operation = readline.question();
 // Perform the operation on the 2 numbers.
 
 let output;
-if (operation === `1`) {
-  output = Number(number1) + Number(number2);
-} else if (operation === '2') {
-  output = Number(number1) - Number(number2);
-} else if (operation === '3') {
-  output = Number(number1) * Number(number2);
-} else if (operation === '4') {
-  output = Number(number1) / Number(number2);
+
+switch (operation) {
+  case '1':
+    output = Number(number1) + Number(number2);
+    break;
+  case '2':
+    output = Number(number1) - Number(number2);
+    break;
+  case '3':
+    output = Number(number1) * Number(number2);
+    break;
+  case '4':
+    output = Number(number1) / Number(number2);
+    break;
 }
 // Print the result to the terminal.
 
