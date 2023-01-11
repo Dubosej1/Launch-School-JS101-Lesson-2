@@ -10,7 +10,10 @@ function invalidNumber(number) {
 
 prompt('Welcome to Calculator');
 
-// Ask the user for the first number
+let programActive = true;
+
+do {
+  // Ask the user for the first number
 
 prompt("What's the first number?");
 let number1 = readline.question();
@@ -61,5 +64,25 @@ switch (operation) {
 }
 // Print the result to the terminal.
 
-console.log(`The result is: ${output}`);
+prompt(`The result is: ${output}`);
+
+// Ask user for another calculation
+
+prompt("Would you like to perform another calculation?");
+let performCalc = readline.question();
+
+while (!['yes', 'no'].includes(performCalc.toLowerCase())) {
+  prompt("Must choose 'yes' or 'no'");
+  performCalc = readline.question();
+}
+
+if (performCalc.toLowerCase() === 'yes') {
+  continue;
+} else {
+  programActive = false;
+}
+  
+} while (programActive);
+
+
 
