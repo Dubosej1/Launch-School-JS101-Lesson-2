@@ -1,8 +1,11 @@
 const MESSAGES = require('./calculator_messages.json');
 const readline = require('readline-sync');
 
+const LANG = 'en';
 
-function prompt(message) {
+
+function prompt(key) {
+  let message = messages(key, LANG);
   console.log(`=> ${message}`);
 }
 
@@ -10,39 +13,43 @@ function invalidNumber(number) {
   return number.trimStart() === '' || Number.isNaN(Number(number));
 }
 
-prompt(MESSAGES["welcome"]);
+function messages(message, lang='en') {
+  return MESSAGES[lang][message];
+}
+
+prompt('welcome');
 
 let programActive = true;
 
 do {
   // Ask the user for the first number
 
-prompt(MESSAGES["firstNumber"]);
+prompt("firstNumber");
 let number1 = readline.question();
 
 while (invalidNumber(number1)) {
-  prompt(MESSAGES["wrongNumber"]);
+  prompt("wrongNumber");
   number1 = readline.question();
 }
 
 
 // Ask the user for the second number
 
-prompt(MESSAGES["secondNumber"]);
+prompt("secondNumber");
 let number2 = readline.question();
 
 while (invalidNumber(number2)) {
-  prompt(MESSAGES["wrongNumber"]);
+  prompt("wrongNumber");
   number2 = readline.question();
 }
 
 // Ask the user for an operation to perform.
 
-prompt(MESSAGES["operation"]);
+prompt("operation");
 let operation = readline.question();
 
 while (!['1', '2', '3', '4'].includes(operation)) {
-  prompt(MESSAGES["wrongOperation"]);
+  prompt("wrongOperation");
   operation = readline.question();
 }
 
@@ -66,15 +73,15 @@ switch (operation) {
 }
 // Print the result to the terminal.
 
-prompt(`The result is: ${output}`);
+console.log(`The result is: ${output}`);
 
 // Ask user for another calculation
 
-prompt(MESSAGES["continueProgram"]);
+prompt("continueProgram");
 let performCalc = readline.question();
 
 while (!['yes', 'no'].includes(performCalc.toLowerCase())) {
-  prompt(MESSAGES["wrongChoice"]);
+  prompt("wrongChoice");
   performCalc = readline.question();
 }
 
