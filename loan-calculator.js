@@ -8,25 +8,34 @@ while (true) {
   // Ask User for Loan Amount
   message = "What is the loan amount in dollars?";
   let loanAmount = Number(requestUserInput(message, validateLoanAmount)).toFixed(2);
-  console.log(loanAmount);
  
   // Ask User for APR
   message = "What is the APR? (in % or decimal format)";
   let apr = Number(requestUserInput(message, validateAPR));
   let monthlyInterestRate = apr / 12;
-  console.log(monthlyInterestRate);
   
   // Ask User for Loan Duration
   message = "What is the loan duration? (in months or years)";
   let loanDuration = Number(requestUserInput(message, validateLoanDuration));
-  console.log(`${loanDuration} months`);
+  let durationUnit = loanDuration === 1 ? 'month' : 'months';
   
   // Ask user to verify info is correct
-  message = `\nLoan Amount: $${loanAmount}\nAPR: ${apr}\nLoan Duration: ${loanDuration} ${loanDuration === 1 ? 'month' : 'months'}\n======\nIs this info correct? (yes/no)`;
+  message = `\nLoan Amount: $${loanAmount}\nAPR: ${apr}\nLoan Duration: ${loanDuration} ${durationUnit}\n======\nIs this info correct? (yes/no)`;
   let wrongInfo = requestUserInput(message, validateUserAnswer);
   
-  if (wrongInfo === 'no') console.log('no');
+  if (wrongInfo === 'no') continue;
   
+  // Calculate loan payment info
+  
+  let monthlyPayment = calcMonthlyPayment(loanAmount, monthlyInterestRate, loanDuration);
+  let [totalLoanPaymentAmount, totalInterestAmount] = calcTotalAmounts(monthlyPayment, loanAmount, monthlyInterestRate, loanDuration);
+  
+  // Display loan payment info
+  // Prompt User to begin program again
+  message = `\nMonthly Payment: $${monthlyPayment}\nTotal over ${loanDuration} ${durationUnit}: ${totalLoanPaymentAmount}\nTotal Interest: ${totalInterestAmount}\n======\nWould you like to calculate another loan? (yes/no)`;
+  let restartProgram = requestUserInput(message, validateUserAnswer);
+  
+  if (restartProgram === 'no') break; 
 }
 
 function prompt (message) {
@@ -178,5 +187,26 @@ function validateUserAnswer (input) {
   }
   
   return [errorMessage, input];
+}
+
+function calcMonthlyPayment(loanAmount, monthlyInterestRate, loanDuration) {
+      let monthlyPayment = loanAmount * (monthlyInterestRate / (1 - Math.pow((1 + monthlyInterestRate), (-loanDuration))));
+      
+      return monthlyPayment.toFixed(2);
+}
+
+function calcTotalAmounts(monthlyPayments, loanAmount, monthlyInterestRate, loanDuration) {
+  let totalLoanPaymentAmount = monthlyPayments * loanDuration;
+  
+  let totalInterestAmount = 0;
+  
+  //Calculate total interest amount
+  for (let month = 1; month <= loanDuration; month++) {
+    let currentInterestPayment = loanAmount * monthlyInterestRate;
+    totalInterestAmount = Number(currentInterestPayment.toFixed(2)) + totalInterestAmount;
+    loanAmount = loanAmount - (monthlyPayments - currentInterestPayment);
+  }
+  
+  return [totalLoanPaymentAmount, totalInterestAmount];
 }
 
