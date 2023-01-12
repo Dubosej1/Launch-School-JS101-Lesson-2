@@ -1,44 +1,59 @@
 const READLINE = require('readline-sync');
 
+prompt("Welcome to the loan calculator!");
+
+while (true) {
+  let message;
+  
+  // Ask User for Loan Amount
+  message = "What is the loan amount in dollars?";
+  let loanAmount = requestUserInput(message, validateLoanAmount);
+ 
+  // Ask User for APR
+  message = "What is the APR? (in % or decimal format)";
+// let apr = requestUserInput(message, validateAPR);
+  
+}
+
 function prompt (message) {
   console.log(message);
 }
 
-function requestLoanAmount () {
-  let loanAmount;
+function requestUserInput(message, validateInput) {
+  let requestedInput;
   
-  prompt("What is the loan amount in dollars?")
+  prompt(message);
   let userInput = READLINE.question();
   
-  // Validate loan amount input
+  // Validate user input
   while (true) {
-  let [errorMessage, num] =  validateLoanAmount(userInput);
+    let [errorMessage, num] =  validateInput(userInput);
   
-  if (errorMessage) {
-    prompt(errorMessage);
-    userInput = READLINE.question();
-    continue;
+    if (errorMessage) {
+      prompt(errorMessage);
+      userInput = READLINE.question();
+      continue;
+    }
+    requestedInput = Number(num);
+    break;
   }
-  loanAmount = Number(num);
-  break;
-  }
-  return loanAmount;
-  
-  function validateLoanAmount(input) {
-  let errorMessage = null;
-  
-  // Check str for $ sign and parse out
-  if (input[0] === '$') {
-    input = input.slice(1);
-  }
-  
-  // Check if str is a valid number
-  if (input.trimStart() === '' || Number.isNaN(Number(input))) {
-    errorMessage = "Not a valid number.  Please try again.";
-  }
-  
-  return [errorMessage, input];
+  return requestedInput;
 }
+
+function validateLoanAmount(input) {
+    let errorMessage = null;
+  
+    // Check str for $ sign and parse out
+    if (input[0] === '$') {
+      input = input.slice(1);
+    }
+  
+   // Check if str is a valid number
+    if (input.trimStart() === '' || Number.isNaN(Number(input))) {
+      errorMessage = "Not a valid number.  Please try again.";
+    }
+  
+    return [errorMessage, input];
 }
 
 
@@ -55,11 +70,3 @@ function requestLoanAmount () {
 //   return count;
 // }
 
-prompt("Welcome to the loan calculator!");
-
-while (true) {
-  
-  // Ask User for Loan Amount
- let loanAmount = requestLoanAmount();
-  
-}
