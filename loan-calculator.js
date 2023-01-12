@@ -13,7 +13,13 @@ while (true) {
   // Ask User for APR
   message = "What is the APR? (in % or decimal format)";
   let apr = requestUserInput(message, validateAPR);
-  console.log(apr);
+  let monthlyInterestRate = apr / 12;
+  console.log(monthlyInterestRate);
+  
+  // Ask User for Loan Duration
+  message = "What is the loan duration? (in months or years)";
+  let loanDuration = requestUserInput(message, validateLoanDuration);
+  console.log(`${loanDuration} months`);
   
 }
 
@@ -81,6 +87,7 @@ function validateAPR (input) {
     // Convert int to float if necessary
     if (Number.isInteger(Number(input)) || percentUsed) {
       input = +input * 0.01;
+      console.log(`apr input: ${input}`);
     }
     
     // Check for positive num
@@ -89,6 +96,69 @@ function validateAPR (input) {
     }
     return [errorMessage, input];
   
+}
+
+function validateLoanDuration (input) {
+  let errorMessage;
+  let acceptedTermsArr = ['m', 'mon', 'month', 'months', 'y', 'yr', 'year', 'years'];
+  
+  let inputArr = input.trim().split(' ');
+  
+  let [num, unit] = inputArr;
+  
+  // Check if user input is a valid number
+  if (Number.isNaN(Number(num))) {
+    errorMessage = "Not a valid number.  Please try again...";
+    return [errorMessage, input];
+  }
+  
+  // Check if user only input a number without unit
+  if (inputArr.length === 1) {
+    input = Math.ceil(Number(num));
+    return [errorMessage, input];
+  }
+  
+  // Checks if user input a valid unit term
+  if (!acceptedTermsArr.includes(unit)) {
+    errorMessage = "Not a valid term.  Please specify 'months' or 'years'";
+    return [errorMessage, input];
+  }
+  
+  // Converts loan duration to months if user specified years
+  if (acceptedTermsArr.slice(4).includes(unit)) {
+    input = convertYearsToMonths(num);
+  } else {
+      input = Math.ceil(Number(num));
+  }
+  
+  return [errorMessage, input];
+  
+  function convertYearsToMonths (years) {
+    
+    //If years is an int, convert to months
+    if (Number.isInteger(+years)) {
+      return +years * 12;
+    }
+    
+    //If years is a float, convert decimal to addtional months
+    let floatArr = Number(years).toFixed(3).split('.');
+    let [intPart, fractionPart] = floatArr;
+    
+    let extraMonths = 0;
+    let numerator = 1;
+    
+    while (true) {
+      if (+fractionPart === 0) break;
+      
+      extraMonths = extraMonths + 1;
+      
+      if (+fractionPart <= (numerator / 12) * 1000) break;
+      
+      numerator = numerator + 1;
+    }
+    
+    return (+intPart * 12) + extraMonths;
+  }
 }
 
 
