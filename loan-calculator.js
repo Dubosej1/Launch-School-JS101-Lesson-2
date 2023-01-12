@@ -8,10 +8,12 @@ while (true) {
   // Ask User for Loan Amount
   message = "What is the loan amount in dollars?";
   let loanAmount = requestUserInput(message, validateLoanAmount);
+  console.log(loanAmount);
  
   // Ask User for APR
   message = "What is the APR? (in % or decimal format)";
-// let apr = requestUserInput(message, validateAPR);
+  let apr = requestUserInput(message, validateAPR);
+  console.log(apr);
   
 }
 
@@ -50,10 +52,43 @@ function validateLoanAmount(input) {
   
    // Check if str is a valid number
     if (input.trimStart() === '' || Number.isNaN(Number(input))) {
-      errorMessage = "Not a valid number.  Please try again.";
+      errorMessage = "Not a valid number.  Please try again...";
+    }
+    
+    if (+input < 0) {
+      errorMessage = "Input must be positive.  Please try again...";
     }
   
+    return [errorMessage, +input];
+}
+
+function validateAPR (input) {
+      let errorMessage = null;
+      let percentUsed = false;
+  
+    // Check str for % sign and parse out
+    if (input.slice(-1) === '%') {
+      percentUsed = true;
+      input = input.slice(0, -1);
+    }
+  
+   // Check if str is a valid number
+    if (input.trimStart() === '' || Number.isNaN(Number(input))) {
+      errorMessage = "Not a valid number.  Please try again.";
+      return [errorMessage, input];
+    }
+    
+    // Convert int to float if necessary
+    if (Number.isInteger(Number(input)) || percentUsed) {
+      input = +input * 0.01;
+    }
+    
+    // Check for positive num
+    if (input < 0) {
+      errorMessage = "Input must be positive.  Please try again.";
+    }
     return [errorMessage, input];
+  
 }
 
 
