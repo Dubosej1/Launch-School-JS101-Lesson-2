@@ -7,42 +7,49 @@ while (true) {
   
   // Ask User for Loan Amount
   message = "What is the loan amount in dollars?";
-  let loanAmount = requestUserInput(message, validateLoanAmount);
+  let loanAmount = Number(requestUserInput(message, validateLoanAmount)).toFixed(2);
   console.log(loanAmount);
  
   // Ask User for APR
   message = "What is the APR? (in % or decimal format)";
-  let apr = requestUserInput(message, validateAPR);
+  let apr = Number(requestUserInput(message, validateAPR));
   let monthlyInterestRate = apr / 12;
   console.log(monthlyInterestRate);
   
   // Ask User for Loan Duration
   message = "What is the loan duration? (in months or years)";
-  let loanDuration = requestUserInput(message, validateLoanDuration);
+  let loanDuration = Number(requestUserInput(message, validateLoanDuration));
   console.log(`${loanDuration} months`);
+  
+  // Ask user to verify info is correct
+  message = `\nLoan Amount: $${loanAmount}\nAPR: ${apr}\nLoan Duration: ${loanDuration} ${loanDuration === 1 ? 'month' : 'months'}\n======\nIs this info correct? (yes/no)`;
+  let wrongInfo = requestUserInput(message, validateUserAnswer);
+  
+  if (wrongInfo === 'no') console.log('no');
   
 }
 
 function prompt (message) {
-  console.log(message);
+  console.log(`=> ${message}`);
 }
 
 function requestUserInput(message, validateInput) {
   let requestedInput;
   
+  // Prompt user for input
   prompt(message);
   let userInput = READLINE.question();
   
   // Validate user input
   while (true) {
-    let [errorMessage, num] =  validateInput(userInput);
+    let [errorMessage, result] =  validateInput(userInput);
   
     if (errorMessage) {
       prompt(errorMessage);
       userInput = READLINE.question();
       continue;
     }
-    requestedInput = Number(num);
+    requestedInput = result;
     break;
   }
   return requestedInput;
@@ -65,7 +72,7 @@ function validateLoanAmount(input) {
       errorMessage = "Input must be positive.  Please try again...";
     }
   
-    return [errorMessage, +input];
+    return [errorMessage, input];
 }
 
 function validateAPR (input) {
@@ -99,7 +106,7 @@ function validateAPR (input) {
 }
 
 function validateLoanDuration (input) {
-  let errorMessage;
+  let errorMessage = null;
   let acceptedTermsArr = ['m', 'mon', 'month', 'months', 'y', 'yr', 'year', 'years'];
   
   let inputArr = input.trim().split(' ');
@@ -161,17 +168,15 @@ function validateLoanDuration (input) {
   }
 }
 
-
-
-// function charCounter(string, searchChar) {
-//   let count = 0;
+function validateUserAnswer (input) {
+  let errorMessage = null;
   
-//   for (let char of string) {
-//     if (char === searchChar) {
-//       count += 1;
-//     }
-//   }
+  input = input.toLowerCase();
   
-//   return count;
-// }
+  if (!['yes', 'no'].includes(input)) {
+    errorMessage = "Invalid input.  Please enter 'yes' or 'no'";
+  }
+  
+  return [errorMessage, input];
+}
 
