@@ -1,48 +1,50 @@
 const READLINE = require('readline-sync');
 
+console.clear();
 prompt("Welcome to the loan calculator!");
 
 while (true) {
-  let message;
-
   // Ask User for Loan Amount
-  message = "What is the loan amount in dollars?";
-  let loanAmount = requestUserInput(message, validateLoanAmount);
-
+  let loanAmount = requestLoanAmount();
 
   // Ask User for APR
-  message = "What is the APR? (in % or decimal format)";
-  let apr = Number(requestUserInput(message, validateAPR));
-  let monthlyInterestRate = apr / 12;
+  let [monthlyInterestRate, apr] = requestAPR();
 
   // Ask User for Loan Duration
-  message = "What is the loan duration? (in months or years)";
-  let loanDuration = Number(requestUserInput(message, validateLoanDuration));
-  let durationUnit = loanDuration === 1 ? 'month' : 'months';
+  let [loanDuration, durationUnit] = requestLoanDuration();
 
   // Ask user to verify info is correct
-  message = `\nLoan Amount: $${loanAmount}\nAPR: ${apr}\nLoan Duration: ${loanDuration} ${durationUnit}\n======\nIs this info correct? (yes/no)`;
-  let wrongInfo = requestUserInput(message, validateUserAnswer);
-
-  if (wrongInfo === 'no') continue;
+  let userInfo = [loanAmount, apr, loanDuration, durationUnit];
+  let isInfoCorrect = requestInfoVerification(userInfo);
+  if (isInfoCorrect === 'no') continue;
 
   // Calculate loan payment info
-
-  let loanInfo = [loanAmount, monthlyInterestRate, loanDuration];
-  let monthlyPayment = calcMonthlyPayment(loanInfo);
-  let totalsArr = calcTotalAmounts(monthlyPayment, loanInfo);
-  let [totalLoanPaymentAmount, totalInterestAmount] = totalsArr;
+  let loanInfo = [loanAmount, monthlyInterestRate, loanDuration, durationUnit];
+  let paymentInfo = calcLoanPaymentInfo(loanInfo);
 
   // Display loan payment info
-  // Prompt User to begin program again
-  message = `\nMonthly Payment: $${monthlyPayment}\nTotal over ${loanDuration} ${durationUnit}: ${totalLoanPaymentAmount}\nTotal Interest: ${totalInterestAmount}\n======\nWould you like to calculate another loan? (yes/no)`;
-  let restartProgram = requestUserInput(message, validateUserAnswer);
+  displayPaymentInfo(loanInfo, paymentInfo);
 
+  // Prompt User to begin program again
+  let restartProgram = requestRestartProgram();
   if (restartProgram === 'no') break;
 }
 
 function prompt (message) {
   console.log(`=> ${message}`);
+}
+
+function displayPaymentInfo (loanInfo, paymentInfo) {
+  let [ , ,duration, durationUnit] = loanInfo;
+  let [monthlyPayment, totalPaymentAmt, totalIntAmt] = paymentInfo;
+
+  let monthPayStr = `Monthly Payment: $${monthlyPayment}`;
+  let durationStr = `Total over ${duration} ${durationUnit}: $${totalPaymentAmt}`;
+  let totalIntStr = `Total Interest: $${totalIntAmt}`;
+  let message = `\n${monthPayStr}\n${durationStr}\n${totalIntStr}`;
+
+  console.clear();
+  prompt(message);
 }
 
 function requestUserInput(message, validateInput) {
@@ -67,127 +69,171 @@ function requestUserInput(message, validateInput) {
   return requestedInput;
 }
 
-function validateLoanAmount(input) {
-  let errorMessage = null;
+function requestLoanAmount() {
+  let message = "What is the loan amount in dollars?";
 
-  // Check str for $ sign and parse out
-  if (input[0] === '$') {
-    input = input.slice(1);
+  return requestUserInput(message, validateLoanAmount);
+
+  function validateLoanAmount(input) {
+    let errorMessage = null;
+
+    // Check str for $ sign and parse out
+    if (input[0] === '$') {
+      input = input.slice(1);
+    }
+
+    // Check if str is a valid number
+    if (input.trimStart() === '' || Number.isNaN(Number(input))) {
+      errorMessage = "Not a valid number.  Please try again...";
+    }
+
+    if (+input <= 1) {
+      errorMessage = "Input must be greater than 0.  Please try again...";
+    }
+
+    // Convert type to number
+    input = +(Number.parseFloat(input).toFixed(2));
+
+    return [errorMessage, input];
   }
-
-  // Check if str is a valid number
-  if (input.trimStart() === '' || Number.isNaN(Number(input))) {
-    errorMessage = "Not a valid number.  Please try again...";
-  }
-
-  if (+input <= 1) {
-    errorMessage = "Input must be greater than 0.  Please try again...";
-  }
-
-  // Convert type to number
-  input = +(Number.parseFloat(input).toFixed(2));
-
-  return [errorMessage, input];
 }
 
-function validateAPR (input) {
-  let errorMessage = null;
-  let percentUsed = false;
+function requestAPR () {
+  let message = "What is the APR? (in % or decimal format)";
+  let apr = requestUserInput(message, validateAPR);
+  let monthlyInterestRate = apr / 12;
 
-  // Check str for % sign and parse out
-  if (input.slice(-1) === '%') {
-    percentUsed = true;
-    input = input.slice(0, -1);
-  }
+  return [monthlyInterestRate, apr];
 
-  // Check if str is a valid number
-  if (input.trimStart() === '' || Number.isNaN(Number(input))) {
-    errorMessage = "Not a valid number.  Please try again.";
-    return [errorMessage, input];
-  }
+  function validateAPR (input) {
+    let errorMessage = null;
+    let percentUsed = false;
 
-  // Convert int to float if necessary
-  if (Number.isInteger(Number(input)) || percentUsed) {
-    input = +input * 0.01;
-    console.log(`apr input: ${input}`);
-  }
+    // Check str for % sign and parse out
+    if (input.slice(-1) === '%') {
+      percentUsed = true;
+      input = input.slice(0, -1);
+    }
 
-  // Check for positive num
-  if (input < 0) {
-    errorMessage = "Input must be positive.  Please try again.";
-  }
-  return [errorMessage, input];
-
-}
-
-function validateLoanDuration (input) {
-  let errorMessage = null;
-  let inputArr = input.trim().split(' ');
-  let [num, unit] = inputArr;
-
-  // Check if user input is a valid number
-  if (Number.isNaN(Number(num))) {
-    errorMessage = "Not a valid number.  Please try again...";
-    return [errorMessage, input];
-  }
-
-  // Check if user only input a number without unit
-  if (inputArr.length === 1) {
-    input = Math.ceil(Number(num));
-    return [errorMessage, input];
-  }
-
-  [errorMessage, input] = checkLoanDurationUnit(input, num, unit);
-
-  return [errorMessage, input];
-
-  function checkLoanDurationUnit (input, num, unit) {
-    let errorMessage =  null;
-    let acceptedTermsArr = ['m', 'mon', 'month', 'months', 'y', 'yr', 'year', 'years'];
-
-    // Checks if user input a valid unit term
-    if (!acceptedTermsArr.includes(unit)) {
-      errorMessage = "Not a valid term.  Please specify 'months' or 'years'";
+    // Check if str is a valid number
+    if (input.trimStart() === '' || Number.isNaN(Number(input))) {
+      errorMessage = "Not a valid number.  Please try again.";
       return [errorMessage, input];
     }
 
-    // Converts loan duration to months if user specified years
-    if (acceptedTermsArr.slice(4).includes(unit)) {
-      input = convertYearsToMonths(num);
-    } else {
-      input = Math.ceil(Number(num));
+    // Convert int to float if necessary
+    if (Number.isInteger(Number(input)) || percentUsed) {
+      input = +input * 0.01;
+      console.log(`apr input: ${input}`);
     }
 
-    return [errorMessage, input];
+    // Check for positive num
+    if (input < 0) {
+      errorMessage = "Input must be positive.  Please try again.";
+    }
+    return [errorMessage, +input];
 
-    function convertYearsToMonths (years) {
+  }
 
-      //If years is an int, convert to months
-      if (Number.isInteger(+years)) {
-        return +years * 12;
+}
+
+function requestLoanDuration() {
+  let message = "What is the loan duration? (in months or years)";
+  let loanDuration = requestUserInput(message, validateLoanDuration);
+  let durationUnit = loanDuration === 1 ? 'month' : 'months';
+
+  return [loanDuration, durationUnit];
+
+  function validateLoanDuration (input) {
+    let errorMessage = null;
+    let inputArr = input.trim().split(' ');
+    let [num, unit] = inputArr;
+
+    // Check if user input is a valid number
+    if (Number.isNaN(Number(num))) {
+      errorMessage = "Not a valid number.  Please try again...";
+      return [errorMessage, input];
+    }
+
+    // Check if user only input a number without unit
+    if (inputArr.length === 1) {
+      input = Math.ceil(Number(num));
+      return [errorMessage, input];
+    }
+
+    [errorMessage, input] = checkLoanDurationUnit(input, num, unit);
+
+    return [errorMessage, +input];
+
+    function checkLoanDurationUnit (input, num, unit) {
+      let errorMessage =  null;
+      let acceptedTermsArr = ['m', 'mon', 'month', 'months', 'y', 'yr', 'year', 'years'];
+
+      // Checks if user input a valid unit term
+      if (!acceptedTermsArr.includes(unit)) {
+        errorMessage = "Not a valid term.  Please specify 'months' or 'years'";
+        return [errorMessage, input];
       }
 
-      //If years is a float, convert decimal to addtional months
-      let floatArr = Number(years).toFixed(3).split('.');
-      let [intPart, fractionPart] = floatArr;
-
-      let extraMonths = 0;
-      let numerator = 1;
-
-      while (true) {
-        if (+fractionPart === 0) break;
-
-        extraMonths += 1;
-
-        if (+fractionPart <= (numerator / 12) * 1000) break;
-
-        numerator += 1;
+      // Converts loan duration to months if user specified years
+      if (acceptedTermsArr.slice(4).includes(unit)) {
+        input = convertYearsToMonths(num);
+      } else {
+        input = Math.ceil(Number(num));
       }
 
-      return (+intPart * 12) + extraMonths;
+      return [errorMessage, input];
+
+      function convertYearsToMonths (years) {
+
+        //If years is an int, convert to months
+        if (Number.isInteger(+years)) {
+          return +years * 12;
+        }
+
+        //If years is a float, convert decimal to addtional months
+        let floatArr = Number(years).toFixed(3).split('.');
+        let [intPart, fractionPart] = floatArr;
+
+        let extraMonths = 0;
+        let numerator = 1;
+
+        while (true) {
+          if (+fractionPart === 0) break;
+
+          extraMonths += 1;
+
+          if (+fractionPart <= (numerator / 12) * 1000) break;
+
+          numerator += 1;
+        }
+
+        return (+intPart * 12) + extraMonths;
+      }
     }
   }
 }
+
+function requestInfoVerification (userInfoArr) {
+  let [loanAmount, apr, loanDuration, durationUnit] = userInfoArr;
+
+  let amountStr = `Loan Amount: $${loanAmount}`;
+  let aprStr = `APR: ${apr}`;
+  let durationStr = `Loan Duration: ${loanDuration} ${durationUnit}`;
+  let promptStr = `Is this info correct? (yes/no)`;
+  let message = `\n${amountStr}\n${aprStr}\n${durationStr}\n======\n${promptStr}`;
+
+  console.clear();
+  let isInfoCorrect = requestUserInput(message, validateUserAnswer);
+
+  return isInfoCorrect;
+}
+
+function requestRestartProgram () {
+  let message = `Do you want to calculate another loan? (yes/no)`;
+  return requestUserInput(message, validateUserAnswer);
+}
+
 
 function validateUserAnswer (input) {
   let errorMessage = null;
@@ -201,31 +247,40 @@ function validateUserAnswer (input) {
   return [errorMessage, input];
 }
 
-function calcMonthlyPayment(loanInfoArr) {
+function calcLoanPaymentInfo(loanInfo) {
+  let monthlyPayment = calcMonthlyPayment(loanInfo);
+  let totalsArr = calcTotalAmounts(monthlyPayment, loanInfo);
+  let [totalPaymentAmt, totalIntAmt] = totalsArr;
 
-  let [loanAmount, monthlyInterestRate, loanDuration] = loanInfoArr;
+  return [monthlyPayment, totalPaymentAmt, totalIntAmt];
 
-  let denominator = (1 - Math.pow((1 + monthlyInterestRate), (-loanDuration)));
-  let monthlyPayment = loanAmount * (monthlyInterestRate / denominator);
+  function calcMonthlyPayment(loanInfoArr) {
 
-  return monthlyPayment.toFixed(2);
-}
+    let [loanAmount, monthlyIntRate, loanDuration] = loanInfoArr;
 
-function calcTotalAmounts(monthlyPayments, loanInfoArr) {
+    let denominator = (1 - Math.pow((1 + monthlyIntRate), (-loanDuration)));
+    let monthlyPayment = loanAmount * (monthlyIntRate / denominator);
 
-  let [loanAmount, monthlyInterestRate, loanDuration] = loanInfoArr;
-
-  let totalLoanPaymentAmount = monthlyPayments * loanDuration;
-
-  let totalInterestAmount = 0;
-
-  //Calculate total interest amount
-  for (let month = 1; month <= loanDuration; month++) {
-    let currIntPayment = loanAmount * monthlyInterestRate;
-    totalInterestAmount = +(currIntPayment.toFixed(2)) + totalInterestAmount;
-    loanAmount -= (monthlyPayments - currIntPayment);
+    return monthlyPayment.toFixed(2);
   }
 
-  return [totalLoanPaymentAmount, totalInterestAmount];
+  function calcTotalAmounts(monthlyPayments, loanInfoArr) {
+
+    let [loanAmount, monthlyInterestRate, loanDuration] = loanInfoArr;
+
+    let totalLoanPaymentAmount = monthlyPayments * loanDuration;
+
+    let totalInterestAmount = 0;
+
+    //Calculate total interest amount
+    for (let month = 1; month <= loanDuration; month++) {
+      let currIntPayment = loanAmount * monthlyInterestRate;
+      totalInterestAmount = +(currIntPayment.toFixed(2)) + totalInterestAmount;
+      loanAmount -= (monthlyPayments - currIntPayment);
+    }
+
+    return [totalLoanPaymentAmount, totalInterestAmount];
+  }
 }
+
 
