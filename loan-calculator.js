@@ -32,7 +32,7 @@ function displayPaymentInfo (loanInfo, paymentInfo) {
   // Unpack needed variables
   let [ , ,duration, durationUnit] = loanInfo;
   let [monthlyPayment, totalPaymentAmt, totalIntAmt] = paymentInfo;
-  
+
   // Convert monthlyPayment into $0.00 format
   monthlyPayment = +(monthlyPayment.toFixed(2));
 
@@ -42,7 +42,7 @@ function displayPaymentInfo (loanInfo, paymentInfo) {
   let totalIntStr = `Total Interest: $${totalIntAmt}`;
   let message = `\n${monthPayStr}\n${durationStr}\n${totalIntStr}`;
 
-  // console.clear();
+  console.clear();
   prompt(message);
 }
 
@@ -154,7 +154,7 @@ function requestLoanDuration() {
       errorMessage = "Not a valid number.  Please try again...";
       return [errorMessage, input];
     }
-    
+
     // Check for positive num
     if (num <= 0) {
       errorMessage = "Input must greater than 1.  Please try again.";
@@ -166,7 +166,6 @@ function requestLoanDuration() {
       input = Math.ceil(Number(num));
       return [errorMessage, input];
     }
-    
 
 
     [errorMessage, input] = checkLoanDurationUnit(input, num, unit);
@@ -267,12 +266,12 @@ function calcLoanPaymentInfo(loanInfo) {
 
     let [loanAmount, monthlyIntRate, loanDuration] = loanInfoArr;
     let monthlyPayment;
-    
+
     if (monthlyIntRate === 0) {
       monthlyPayment = loanAmount / loanDuration;
     } else {
-        let denominator = (1 - Math.pow((1 + monthlyIntRate), (-loanDuration)));
-        monthlyPayment = loanAmount * (monthlyIntRate / denominator);
+      let denominator = (1 - Math.pow((1 + monthlyIntRate), (-loanDuration)));
+      monthlyPayment = loanAmount * (monthlyIntRate / denominator);
     }
 
     return monthlyPayment;
@@ -281,7 +280,7 @@ function calcLoanPaymentInfo(loanInfo) {
   function calcTotalAmounts(monthlyPayments, loanInfoArr) {
 
     let [loanAmount, monthlyInterestRate, loanDuration] = loanInfoArr;
-    
+
     console.log(`MP: ${monthlyPayments} LD: ${loanDuration} MIR: ${monthlyInterestRate}`);
 
     //Calculate total loan payment amount
@@ -290,15 +289,15 @@ function calcLoanPaymentInfo(loanInfo) {
 
     //Calculate total interest amount
     let totalIntAmt = 0;
-    
+
     if (monthlyInterestRate === 0) return [totalLoanPaymentAmount, totalIntAmt];
 
     for (let month = 1; month <= loanDuration; month++) {
       let currIntPayment = loanAmount * monthlyInterestRate;
       totalIntAmt = currIntPayment + totalIntAmt;
-      loanAmount = loanAmount - (monthlyPayments - currIntPayment);
+      loanAmount -= (monthlyPayments - currIntPayment);
     }
-    
+
     totalIntAmt = +(totalIntAmt.toFixed(2));
 
     return [totalLoanPaymentAmount, totalIntAmt];
