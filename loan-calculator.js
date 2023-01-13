@@ -3,29 +3,23 @@ const READLINE = require('readline-sync');
 console.clear();
 prompt("Welcome to the loan calculator!");
 
+// Main Program Loop
 while (true) {
-  // Ask User for Loan Amount
   let loanAmount = requestLoanAmount();
 
-  // Ask User for APR
   let [monthlyInterestRate, apr] = requestAPR();
 
-  // Ask User for Loan Duration
   let [loanDuration, durationUnit] = requestLoanDuration();
 
-  // Ask user to verify info is correct
   let userInfo = [loanAmount, apr, loanDuration, durationUnit];
   let isInfoCorrect = requestInfoVerification(userInfo);
   if (isInfoCorrect === 'no') continue;
 
-  // Calculate loan payment info
   let loanInfo = [loanAmount, monthlyInterestRate, loanDuration, durationUnit];
   let paymentInfo = calcLoanPaymentInfo(loanInfo);
 
-  // Display loan payment info
   displayPaymentInfo(loanInfo, paymentInfo);
 
-  // Prompt User to begin program again
   let restartProgram = requestRestartProgram();
   if (restartProgram === 'no') break;
 }
@@ -35,9 +29,11 @@ function prompt (message) {
 }
 
 function displayPaymentInfo (loanInfo, paymentInfo) {
+  // Unpack needed variables
   let [ , ,duration, durationUnit] = loanInfo;
   let [monthlyPayment, totalPaymentAmt, totalIntAmt] = paymentInfo;
 
+  // Construct message
   let monthPayStr = `Monthly Payment: $${monthlyPayment}`;
   let durationStr = `Total over ${duration} ${durationUnit}: $${totalPaymentAmt}`;
   let totalIntStr = `Total Interest: $${totalIntAmt}`;
@@ -87,6 +83,7 @@ function requestLoanAmount() {
       errorMessage = "Not a valid number.  Please try again...";
     }
 
+    // Check if input is greater than 0
     if (+input <= 1) {
       errorMessage = "Input must be greater than 0.  Please try again...";
     }
@@ -142,7 +139,7 @@ function requestLoanDuration() {
   let loanDuration = requestUserInput(message, validateLoanDuration);
   let durationUnit = loanDuration === 1 ? 'month' : 'months';
 
-  return [loanDuration, durationUnit];
+  return [+loanDuration, durationUnit];
 
   function validateLoanDuration (input) {
     let errorMessage = null;
@@ -163,13 +160,13 @@ function requestLoanDuration() {
 
     [errorMessage, input] = checkLoanDurationUnit(input, num, unit);
 
-    return [errorMessage, +input];
+    return [errorMessage, input];
 
     function checkLoanDurationUnit (input, num, unit) {
       let errorMessage =  null;
       let acceptedTermsArr = ['m', 'mon', 'month', 'months', 'y', 'yr', 'year', 'years'];
 
-      // Checks if user input a valid unit term
+      // Checks if user input contains a valid unit term
       if (!acceptedTermsArr.includes(unit)) {
         errorMessage = "Not a valid term.  Please specify 'months' or 'years'";
         return [errorMessage, input];
@@ -217,6 +214,7 @@ function requestLoanDuration() {
 function requestInfoVerification (userInfoArr) {
   let [loanAmount, apr, loanDuration, durationUnit] = userInfoArr;
 
+  // Construct message
   let amountStr = `Loan Amount: $${loanAmount}`;
   let aprStr = `APR: ${apr}`;
   let durationStr = `Loan Duration: ${loanDuration} ${durationUnit}`;
@@ -261,22 +259,23 @@ function calcLoanPaymentInfo(loanInfo) {
     let denominator = (1 - Math.pow((1 + monthlyIntRate), (-loanDuration)));
     let monthlyPayment = loanAmount * (monthlyIntRate / denominator);
 
-    return monthlyPayment.toFixed(2);
+    return +(monthlyPayment.toFixed(2));
   }
 
   function calcTotalAmounts(monthlyPayments, loanInfoArr) {
 
     let [loanAmount, monthlyInterestRate, loanDuration] = loanInfoArr;
 
+    //Calculate total loan payment amount
     let totalLoanPaymentAmount = monthlyPayments * loanDuration;
 
+    //Calculate total interest amount
     let totalInterestAmount = 0;
 
-    //Calculate total interest amount
     for (let month = 1; month <= loanDuration; month++) {
       let currIntPayment = loanAmount * monthlyInterestRate;
       totalInterestAmount = +(currIntPayment.toFixed(2)) + totalInterestAmount;
-      loanAmount -= (monthlyPayments - currIntPayment);
+      loanAmount = (monthlyPayments - currIntPayment) - loanAmount;
     }
 
     return [totalLoanPaymentAmount, totalInterestAmount];
