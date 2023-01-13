@@ -32,6 +32,9 @@ function displayPaymentInfo (loanInfo, paymentInfo) {
   // Unpack needed variables
   let [ , ,duration, durationUnit] = loanInfo;
   let [monthlyPayment, totalPaymentAmt, totalIntAmt] = paymentInfo;
+  
+  // Convert monthlyPayment into $0.00 format
+  monthlyPayment = +(monthlyPayment.toFixed(2));
 
   // Construct message
   let monthPayStr = `Monthly Payment: $${monthlyPayment}`;
@@ -39,7 +42,7 @@ function displayPaymentInfo (loanInfo, paymentInfo) {
   let totalIntStr = `Total Interest: $${totalIntAmt}`;
   let message = `\n${monthPayStr}\n${durationStr}\n${totalIntStr}`;
 
-  console.clear();
+  // console.clear();
   prompt(message);
 }
 
@@ -83,9 +86,9 @@ function requestLoanAmount() {
       errorMessage = "Not a valid number.  Please try again...";
     }
 
-    // Check if input is greater than 0
-    if (+input <= 1) {
-      errorMessage = "Input must be greater than 0.  Please try again...";
+    // Check if input is greater than 1
+    if (+input < 1) {
+      errorMessage = "Input must be greater than 1.  Please try again...";
     }
 
     // Convert type to number
@@ -151,12 +154,20 @@ function requestLoanDuration() {
       errorMessage = "Not a valid number.  Please try again...";
       return [errorMessage, input];
     }
+    
+    // Check for positive num
+    if (num <= 0) {
+      errorMessage = "Input must greater than 1.  Please try again.";
+      return [errorMessage, input];
+    }
 
     // Check if user only input a number without unit
     if (inputArr.length === 1) {
       input = Math.ceil(Number(num));
       return [errorMessage, input];
     }
+    
+
 
     [errorMessage, input] = checkLoanDurationUnit(input, num, unit);
 
@@ -255,30 +266,42 @@ function calcLoanPaymentInfo(loanInfo) {
   function calcMonthlyPayment(loanInfoArr) {
 
     let [loanAmount, monthlyIntRate, loanDuration] = loanInfoArr;
+    let monthlyPayment;
+    
+    if (monthlyIntRate === 0) {
+      monthlyPayment = loanAmount / loanDuration;
+    } else {
+        let denominator = (1 - Math.pow((1 + monthlyIntRate), (-loanDuration)));
+        monthlyPayment = loanAmount * (monthlyIntRate / denominator);
+    }
 
-    let denominator = (1 - Math.pow((1 + monthlyIntRate), (-loanDuration)));
-    let monthlyPayment = loanAmount * (monthlyIntRate / denominator);
-
-    return +(monthlyPayment.toFixed(2));
+    return monthlyPayment;
   }
 
   function calcTotalAmounts(monthlyPayments, loanInfoArr) {
 
     let [loanAmount, monthlyInterestRate, loanDuration] = loanInfoArr;
+    
+    console.log(`MP: ${monthlyPayments} LD: ${loanDuration} MIR: ${monthlyInterestRate}`);
 
     //Calculate total loan payment amount
     let totalLoanPaymentAmount = monthlyPayments * loanDuration;
+    totalLoanPaymentAmount = +(totalLoanPaymentAmount.toFixed(2));
 
     //Calculate total interest amount
-    let totalInterestAmount = 0;
+    let totalIntAmt = 0;
+    
+    if (monthlyInterestRate === 0) return [totalLoanPaymentAmount, totalIntAmt];
 
     for (let month = 1; month <= loanDuration; month++) {
       let currIntPayment = loanAmount * monthlyInterestRate;
-      totalInterestAmount = +(currIntPayment.toFixed(2)) + totalInterestAmount;
-      loanAmount = (monthlyPayments - currIntPayment) - loanAmount;
+      totalIntAmt = currIntPayment + totalIntAmt;
+      loanAmount = loanAmount - (monthlyPayments - currIntPayment);
     }
+    
+    totalIntAmt = +(totalIntAmt.toFixed(2));
 
-    return [totalLoanPaymentAmount, totalInterestAmount];
+    return [totalLoanPaymentAmount, totalIntAmt];
   }
 }
 
