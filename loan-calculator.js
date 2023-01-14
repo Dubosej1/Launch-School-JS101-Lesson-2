@@ -25,7 +25,7 @@ while (true) {
     prompt("Thank you for using the Loan Calculator!");
     break;
   }
-  
+
   console.clear();
 }
 
