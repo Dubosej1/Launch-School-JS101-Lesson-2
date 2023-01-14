@@ -1,7 +1,7 @@
 const READLINE = require('readline-sync');
 
 console.clear();
-prompt("Welcome to the loan calculator!");
+prompt("Welcome to the Loan Calculator!");
 
 // Main Program Loop
 while (true) {
@@ -21,7 +21,12 @@ while (true) {
   displayPaymentInfo(loanInfo, paymentInfo);
 
   let restartProgram = requestRestartProgram();
-  if (restartProgram === 'no') break;
+  if (restartProgram === 'no') {
+    prompt("Thank you for using the Loan Calculator!");
+    break;
+  }
+  
+  console.clear();
 }
 
 function prompt (message) {
@@ -40,7 +45,8 @@ function displayPaymentInfo (loanInfo, paymentInfo) {
   let monthPayStr = `Monthly Payment: $${monthlyPayment}`;
   let durationStr = `Total over ${duration} ${durationUnit}: $${totalPaymentAmt}`;
   let totalIntStr = `Total Interest: $${totalIntAmt}`;
-  let message = `\n${monthPayStr}\n${durationStr}\n${totalIntStr}`;
+  let border = `\n======`;
+  let message = `\n${monthPayStr}\n${durationStr}\n${totalIntStr}` + border;
 
   console.clear();
   prompt(message);
@@ -82,8 +88,10 @@ function requestLoanAmount() {
     }
 
     // Check if str is a valid number
-    if (input.trimStart() === '' || Number.isNaN(Number(input))) {
+    let isNotANum = input.trimStart() === '' || Number.isNaN(Number(input));
+    if (isNotANum || input === Infinity) {
       errorMessage = "Not a valid number.  Please try again...";
+      return [errorMessage, input];
     }
 
     // Check if input is greater than 1
@@ -116,7 +124,8 @@ function requestAPR () {
     }
 
     // Check if str is a valid number
-    if (input.trimStart() === '' || Number.isNaN(Number(input))) {
+    let isNotANum = input.trimStart() === '' || Number.isNaN(Number(input));
+    if (isNotANum || input === Infinity) {
       errorMessage = "Not a valid number.  Please try again.";
       return [errorMessage, input];
     }
@@ -124,11 +133,10 @@ function requestAPR () {
     // Convert int to float if necessary
     if (Number.isInteger(Number(input)) || percentUsed) {
       input = +input * 0.01;
-      console.log(`apr input: ${input}`);
     }
 
-    // Check for positive num
-    if (input < 0) {
+    // Check if input is negative or -0
+    if (input < 0 || (1 / input) === -Infinity ) {
       errorMessage = "Input must be positive.  Please try again.";
     }
     return [errorMessage, +input];
@@ -150,7 +158,7 @@ function requestLoanDuration() {
     let [num, unit] = inputArr;
 
     // Check if user input is a valid number
-    if (Number.isNaN(Number(num))) {
+    if (Number.isNaN(Number(num)) || num === Infinity) {
       errorMessage = "Not a valid number.  Please try again...";
       return [errorMessage, input];
     }
