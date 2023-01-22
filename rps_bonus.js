@@ -2,7 +2,7 @@ const readline = require('readline-sync');
 
 const VALID_HANDS = ['rock', 'paper', 'scissors', 'lizard', 'spock'];
 
-const GAME_INPUTS = {
+const GAME_USER_INPUTS = {
   singleRound: '1',
   best5: '5',
   contSingle: 'c',
@@ -105,6 +105,8 @@ let score = {
   }
 };
 
+// Main Game Loop
+
 console.clear();
 
 welcomePlayer();
@@ -113,7 +115,7 @@ let options = [`singleRound`,'best5', 'rules', 'quit'];
 let gameActive = true;
 
 while (gameActive) {
-  let input = decideGameMode(options);
+  let input = getGameMode(options);
 
   if (input === "contSingle" || input === "contBest5") {
     if (options.includes("contSingle")) input = "singleRound";
@@ -138,6 +140,7 @@ while (gameActive) {
       continue;
     default:
       gameActive = false;
+      displayGoodbyeMsg();
   }
 }
 
@@ -152,15 +155,19 @@ function welcomePlayer() {
   console.log(message);
 }
 
+function displayGoodbyeMsg() {
+  console.log("\nThank you for playing Rock, Paper, Scissors & More!");
+}
+
 function prompt (message) {
   console.log(`\n=> ${message}`);
 }
 
-function decideGameMode(options) {
+function getGameMode(options) {
   let message = constructGameModeOptionsText(options);
   prompt(message);
 
-  let entriesArr = Object.entries(GAME_INPUTS);
+  let entriesArr = Object.entries(GAME_USER_INPUTS);
   let filteredArr = entriesArr.filter(pair => options.includes(pair[0]));
   let validInputs = filteredArr.map(pair => pair[1]);
 
@@ -169,11 +176,15 @@ function decideGameMode(options) {
     let input = readline.question();
 
     if (validInputs.includes(input)) {
-      return getKeyByValue(GAME_INPUTS, input);
+      return getKeyByValue(GAME_USER_INPUTS, input);
     } else {
       prompt("Invalid input....Please try again...\n");
     }
   }
+}
+
+function getKeyByValue(object, value) {
+  return Object.keys(object).find(key => object[key] === value);
 }
 
 function constructGameModeOptionsText(options) {
@@ -183,15 +194,15 @@ function constructGameModeOptionsText(options) {
   if (hasCont) message = constructContinueRoundText(message, options);
 
   if (options.includes('singleRound')) {
-    message += "Press '1' to play a single round\n";
+    message += "Press [1] to play a single round\n";
   }
 
   if (options.includes('best5')) {
-    message += "Press '5' to play Best of Five rounds\n";
+    message += "Press [5] to play Best of Five rounds\n";
   }
 
   if (options.includes("stats")) {
-    message += "Press 's' to display game stats\n";
+    message += "Press [s] to display game stats\n";
   }
 
   let hasInfo = options.includes('rules') || options.includes('quit');
@@ -202,34 +213,26 @@ function constructGameModeOptionsText(options) {
 
 function constructContinueRoundText(message, options) {
   if (options.includes('contSingle')) {
-    message += "Press 'c' to play another round\n";
+    message += "Press [c] to play another round\n";
   } else {
-    message += "Press 'c' to continue playing Best of Five games\n";
+    message += "Press [c] to continue playing Best of Five games\n";
   }
   return message;
 }
 
 function constructGameInfoText(message, options) {
   if (options.includes('rules')) {
-    message += "Press 'r' to display game rules\n";
+    message += "Press [r] to display game rules\n";
   }
 
   if (options.includes('quit')) {
-    message += "Press 'q' to quit game.";
+    message += "Press [q] to quit game.";
   }
   return message;
 }
 
-function getKeyByValue(object, value) {
-  return Object.keys(object).find(key => object[key] === value);
-}
-
 function playSingleRoundMode(score) {
-  console.clear();
-
-  let border = `===============\n`;
-  let welcomeMessage = `\nROUND`;
-  console.log(border + welcomeMessage);
+  displayWelcomeSingleRoundText();
 
   let round = playRound();
 
@@ -237,6 +240,14 @@ function playSingleRoundMode(score) {
 
   displayRoundOutcome(round);
   displaySingleRoundScore(score);
+}
+
+function displayWelcomeSingleRoundText() {
+  console.clear();
+
+  let border = `===============\n`;
+  let welcomeMessage = `\nROUND`;
+  console.log(border + welcomeMessage);
 }
 
 function playBestOfFiveMode(score) {
@@ -284,6 +295,10 @@ function displayBestFiveRoundInfo(round, score) {
   displayRoundOutcome(round);
   displayBestOfFiveScore(score);
 
+  pauseProgramExecution();
+}
+
+function pauseProgramExecution() {
   readline.question("\nPress [Enter] to continue...");
 }
 
@@ -316,7 +331,7 @@ function getPlayerHandChoice() {
   prompt(message);
 
   while (true) {
-    let input = readline.question();
+    let input = readline.question().toLowerCase();
 
     if (VALID_HANDS.includes(input)) return input;
     else if (abbrMap.has(input)) return abbrMap.get(input);
@@ -360,8 +375,6 @@ function displayRoundOutcome(round) {
 
   let message = `${playerMsg}${computerMsg}\n${battleMsg}${roundOutcomeMsg}`;
   prompt(message);
-
-
 }
 
 function displaySingleRoundScore(score) {
