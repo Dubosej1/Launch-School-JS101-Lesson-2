@@ -1,6 +1,7 @@
 const readline = require('readline-sync');
 
 const VALID_HANDS = ['rock', 'paper', 'scissors', 'lizard', 'spock'];
+const HAND_ABBRS = getAbbreviationsFromHands(VALID_HANDS);
 
 const GAME_USER_INPUTS = {
   singleRound: '1',
@@ -11,7 +12,7 @@ const GAME_USER_INPUTS = {
   rules: 'r',
   quit: 'q'
 };
-let abbrMap = getAbbreviationsFromHands(VALID_HANDS);
+
 
 const OUTCOMES = {
   rock: {
@@ -334,7 +335,7 @@ function getPlayerHandChoice() {
     let input = readline.question().toLowerCase();
 
     if (VALID_HANDS.includes(input)) return input;
-    else if (abbrMap.has(input)) return abbrMap.get(input);
+    else if (HAND_ABBRS.has(input)) return HAND_ABBRS.get(input);
     else prompt("Invalid input.  Please try again...");
   }
 }
