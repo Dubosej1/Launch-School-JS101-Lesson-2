@@ -37,67 +37,71 @@ const OUTCOMES = {
 };
 
 let score = {
-  currSingleRoundPlayerWins: 0,
-  currSingleRoundCPUWins: 0,
-  currSingleRoundTies: 0,
-  currBestOfFivePlayerWins: 0,
-  currBestOfFiveCPUWins: 0,
-  currBestOfFiveTies: 0,
-  totalPlayerRoundWins: 0,
-  totalCPURoundWins: 0,
-  totalRoundTies: 0,
-  totalBestOfFiveGameWins: 0,
+  singleRoundWins: {
+    player: 0,
+    cpu: 0,
+    ties: 0
+  },
+  bestFiveWins: {
+    player: 0,
+    cpu: 0,
+    ties: 0,
+    game: 0
+  },
+  totalRoundWins: {
+    player: 0,
+    cpu: 0,
+    ties: 0
+  },
   totalRoundsPlayed: 0,
-  totalBestOfFiveGamesPlayed: 0,
-
+  totalBestFiveGamesPlayed: 0,
+  
   updateCurrentSingleRoundScore(outcome) {
     switch (outcome) {
       case 'win':
-        this.currSingleRoundPlayerWins += 1;
-        this.totalPlayerRoundWins += 1;
+        this.singleRoundWins.player += 1;
+        this.totalRoundWins.player += 1;
         break;
       case 'lose':
-        this.currSingleRoundCPUWins += 1;
-        this.totalCPURoundWins += 1;
+        this.singleRoundWins.cpu += 1;
+        this.totalRoundWins.cpu += 1;
         break;
       default:
-        this.currSingleRoundTies += 1;
-        this.totalRoundTies += 1;
+        this.singleRoundWins.ties += 1;
+        this.totalRoundWins.ties += 1;
     }
   },
 
   updateCurrentBestOfFiveScore(outcome) {
     switch (outcome) {
       case 'win':
-        this.currBestOfFivePlayerWins += 1;
-        this.totalPlayerRoundWins += 1;
+        this.bestFiveWins.player += 1;
+        this.totalRoundWins.player += 1;
         break;
       case 'lose':
-        this.currBestOfFiveCPUWins += 1;
-        this.totalCPURoundWins += 1;
+        this.bestFiveWins.cpu += 1;
+        this.totalRoundWins.cpu += 1;
         break;
       default:
-        this.currBestOfFiveTies += 1;
-        this.totalRoundTies += 1;
+        this.bestFiveWins.ties += 1;
+        this.totalRoundWins.ties += 1;
     }
   },
-
+  
   updateBestOfFiveRoundTotal(outcome) {
-    if (outcome === 'win') this.totalBestOfFiveGameWins += 1;
+    if (outcome === 'win') this.bestFiveWins.game += 1;
   },
-
+  
   resetCurrentSingleRoundScores() {
-    this.currSingleRoundPlayerWins = 0;
-    this.currSingleRoundCPUWins = 0;
-    this.currSingleRoundTies = 0;
-
+    this.singleRoundWins.player = 0;
+    this.singleRoundWins.cpu = 0;
+    this.singleRoundWins.ties = 0;
   },
-
-
+  
   resetCurrentBestOfFiveScores() {
-    this.currBestOfFivePlayerWins = 0;
-    this.currBestOfFiveCPUWins = 0;
-    this.currBestOfFiveTies = 0;
+    this.bestFiveWins.player = 0;
+    this.bestFiveWins.cpu = 0;
+    this.bestFiveWins.ties = 0;
   }
 };
 
@@ -237,7 +241,7 @@ function playSingleRoundMode(score) {
 
 function playBestOfFiveMode(score) {
   displayWelcomeBestFiveText();
-  score.totalBestOfFiveGamesPlayed += 1;
+  score.totalBestFiveGamesPlayed += 1;
 
   let roundNum = 1;
 
@@ -361,9 +365,9 @@ function displayRoundOutcome(round) {
 }
 
 function displaySingleRoundScore(score) {
-  let playerScore = score.currSingleRoundPlayerWins;
-  let computerScore = score.currSingleRoundCPUWins;
-  let ties = score.currSingleRoundTies;
+  let playerScore = score.singleRoundWins.player;
+  let computerScore = score.singleRoundWins.cpu;
+  let ties = score.singleRoundWins.ties;
 
   let playersScoreMsg = `Player: ${playerScore} Computer: ${computerScore}`;
   let tiesMsg = `Ties: ${ties}`;
@@ -373,9 +377,9 @@ function displaySingleRoundScore(score) {
 }
 
 function displayBestOfFiveScore(score) {
-  let playerScore = score.currBestOfFivePlayerWins;
-  let computerScore = score.currBestOfFiveCPUWins;
-  let ties = score.currBestOfFiveTies;
+  let playerScore = score.bestFiveWins.player;
+  let computerScore = score.bestFiveWins.cpu;
+  let ties = score.bestFiveWins.ties;
 
   let playersScoreMsg = `Player: ${playerScore} Computer: ${computerScore}`;
   let tiesMsg = `Ties: ${ties}`;
@@ -387,8 +391,8 @@ function displayBestOfFiveScore(score) {
 function determineBestOfFiveOutcome (score) {
   const ROUNDS_NEEDED_TO_WIN = 3;
 
-  if (score.currBestOfFivePlayerWins === ROUNDS_NEEDED_TO_WIN) return 'win';
-  else if (score.currBestOfFiveCPUWins === ROUNDS_NEEDED_TO_WIN) return 'lose';
+  if (score.bestFiveWins.player === ROUNDS_NEEDED_TO_WIN) return 'win';
+  else if (score.bestFiveWins.cpu === ROUNDS_NEEDED_TO_WIN) return 'lose';
   else return null;
 }
 
@@ -440,9 +444,9 @@ function displayStats() {
 }
 
 function constructIndRoundStatText(score) {
-  let totalPlayerWins = score.totalPlayerRoundWins;
-  let totalCPUWins = score.totalCPURoundWins;
-  let totalTies = score.totalRoundTies;
+  let totalPlayerWins = score.totalRoundWins.player;
+  let totalCPUWins = score.totalRoundWins.cpu;
+  let totalTies = score.totalRoundWins.ties;
   let totalRounds = score.totalRoundsPlayed;
 
   let totalRoundHeader = `Total Individual Round Wins:\n`;
@@ -457,8 +461,8 @@ function constructIndRoundStatText(score) {
 }
 
 function constructBestFiveStatText(score) {
-  let best5Wins = score.totalBestOfFiveGameWins;
-  let best5GamesPlayed = score.totalBestOfFiveGamesPlayed;
+  let best5Wins = score.bestFiveWins.game;
+  let best5GamesPlayed = score.totalBestFiveGamesPlayed;
 
   let best5WinsMsg = `Total Best of Five Games Won: ${best5Wins}\n`;
   let best5PlayedHeader = `Total Best of Five Games Played: `;
