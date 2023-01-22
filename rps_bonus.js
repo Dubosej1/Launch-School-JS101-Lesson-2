@@ -55,7 +55,7 @@ let score = {
   },
   totalRoundsPlayed: 0,
   totalBestFiveGamesPlayed: 0,
-  
+
   updateCurrentSingleRoundScore(outcome) {
     switch (outcome) {
       case 'win':
@@ -87,17 +87,17 @@ let score = {
         this.totalRoundWins.ties += 1;
     }
   },
-  
+
   updateBestOfFiveRoundTotal(outcome) {
     if (outcome === 'win') this.bestFiveWins.game += 1;
   },
-  
+
   resetCurrentSingleRoundScores() {
     this.singleRoundWins.player = 0;
     this.singleRoundWins.cpu = 0;
     this.singleRoundWins.ties = 0;
   },
-  
+
   resetCurrentBestOfFiveScores() {
     this.bestFiveWins.player = 0;
     this.bestFiveWins.cpu = 0;
@@ -134,7 +134,7 @@ while (gameActive) {
       displayStats(score);
       continue;
     case "rules":
-      // displayRules();
+      displayRules();
       continue;
     default:
       gameActive = false;
@@ -470,4 +470,62 @@ function constructBestFiveStatText(score) {
   let message = best5WinsMsg + best5PlayedMsg;
 
   return message;
+}
+
+function displayRules() {
+  console.clear();
+
+  let border = `===============\n\n`;
+  console.log(border + `Game Rules\n`);
+
+  let directionsTxt = constructGameDirectionsText();
+  let bestFiveRulesTxt = constructBestFiveRulesText();
+  let winningHandTxt = constructWinningHandText();
+
+  console.log(directionsTxt + bestFiveRulesTxt + winningHandTxt);
+}
+
+function constructGameDirectionsText() {
+  let header = "Game Directions:\n";
+
+  let txt = "";
+
+  txt += "Player makes a choice from 5 possible hands: rock, paper, ";
+  txt += "scissors, lizard or spock.  The computer also makes the same ";
+  txt += "choice.  The 2 players then compare their hands.\n\n";
+
+  txt += "Each hand can beat another hands, BUT can also be beaten by yet ";
+  txt += "another hand.  For example, Rock beats Scissors, but Paper can ";
+  txt += "beat Rock.  A list of all winning hand combinations is below.\n\n";
+
+  txt += "Whoever chooses the winning hand, wins the round!  If both ";
+  txt += "players choose the same hand then the round ends in a tie.\n\n";
+
+  return header + txt;
+}
+
+function constructBestFiveRulesText() {
+  let header = "Best of Five:\n";
+
+  let txt = "";
+
+  txt += "Player has the option of playing single rounds or playing Best of ";
+  txt += "Five games.  In Best of Five, whoever is the first to win 3 rounds, ";
+  txt += "wins the game!\n\n";
+
+  return header + txt;
+}
+
+function constructWinningHandText() {
+  let header = "Winning Hand Combos:\n";
+
+  let txt = "";
+
+  txt += "ROCK: beats SCISSORS and LIZARD; is beaten by PAPER and SPOCK.\n";
+  txt += "PAPER: beats ROCK and SPOCK; is beaten by SCISSORS and LIZARD.\n";
+  txt += "SCISSORS: beats PAPER and LIZARD; is beaten by ROCK and SPOCK.\n";
+  txt += "LIZARD: beats PAPER and SPOCK; is beaten by ROCK and SCISSORS.\n";
+  txt += "SPOCK: beats SCISSORS and ROCK; is beaten by PAPER and LIZARD.\n";
+
+  return header + txt;
 }
